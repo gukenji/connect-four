@@ -54,22 +54,22 @@ describe Jogo do
         end
     end
 
-    # describe '#sortear_jogador' do
-    #     subject(:novo_jogo) { described_class.new() }
-    #     let(:jogador1) { instance_double(Jogador, nome: 'Gustavo', cor: 1)}
-    #     let(:jogador2) { instance_double(Jogador, nome: 'Teste', cor: 2)}
-    #     context 'realiza o sorteio do jogador que irá iniciar primeiro' do
-    #         before do
-    #             allow(Random).to receive(:public_send).and_return(jogador1)
-    #         end
+    describe '#sortear_jogador' do
+        subject(:novo_jogo) { described_class.new() }
+        let(:jogador1) { instance_double(Jogador, nome: 'Gustavo', cor: 1)}
+        let(:jogador2) { instance_double(Jogador, nome: 'Teste', cor: 2)}
+        context 'realiza o sorteio do jogador que irá iniciar primeiro' do
+            before do
+                novo_jogo.instance_variable_set(:@jogador1,jogador1)
+                novo_jogo.instance_variable_set(:@jogador2,jogador2)
+                allow(novo_jogo).to receive(:public_send).and_return(jogador1)
+            end
 
-    #         it 'jogador 1 é sorteado' do
-    #             sorteado = novo_jogo.instance_variable_get(:@jogador_atual)
-    #             expect(sorteado).to eq(jogador1)
-    #             novo_jogo.sortear_jogador
-    #         end
-    #     end
-    # end
+            it 'jogador 1 é sorteado' do
+                expect { novo_jogo.sortear_jogador }.to change { novo_jogo.instance_variable_get(:@jogador_atual) }.from(nil).to(jogador1)
+            end
+        end
+    end
 
     describe '#jogada' do
         subject(:novo_jogo) { described_class.new() }
@@ -77,9 +77,9 @@ describe Jogo do
         let(:jogador2) { instance_double(Jogador, nome: 'Teste', cor: 2)}
         context 'Jogada do jogador1 e escolhe coluna 2 que está vazia' do
             before do 
-                novo_jogo.jogador_atual = jogador1
-                novo_jogo.jogador1 = jogador1
-                novo_jogo.jogador2 = jogador2
+                novo_jogo.instance_variable_set(:@jogador_atual,jogador1)
+                novo_jogo.instance_variable_set(:@jogador1,jogador1)
+                novo_jogo.instance_variable_set(:@jogador2,jogador2)
                 allow(novo_jogo).to receive(:gets).and_return('2')
             end
             it 'inclui marcador na coluna 2 e atualiza o proximo jogador como sendo jogador 2' do
@@ -89,9 +89,9 @@ describe Jogo do
 
         context 'Jogada do jogador2 e escolhe coluna 8, inexistente, e depois a coluna 2, que está vazia' do
             before do 
-                novo_jogo.jogador_atual = jogador2
-                novo_jogo.jogador1 = jogador1
-                novo_jogo.jogador2 = jogador2
+                novo_jogo.instance_variable_set(:@jogador_atual,jogador2)
+                novo_jogo.instance_variable_set(:@jogador1,jogador1)
+                novo_jogo.instance_variable_set(:@jogador2,jogador2)
                 allow(novo_jogo).to receive(:gets).and_return('8','1')
             end
             it 'incluir marcador na coluna 1 e muda jogador atual para jogador 1' do
@@ -244,4 +244,34 @@ describe Jogo do
             end
         end
 
+
+        describe '#fim_partida?'
+        subject(:novo_jogo) { described_class.new() }
+        let(:jogador1) { instance_double(Jogador, nome: 'Gustavo', cor: 1)}
+        context 'Jogo sem ganhadores ate o momento' do
+            it 'resultado deve ser false' do
+                resultado = novo_jogo.fim_partida?
+                expect(resultado).to eq(nil)
+            end
+        end
+
+        context 'Jogo possui combinação de linha com ganhador' do
+            before do
+                novo_jogo.tabuleiro.coluna1 = [2,nil,nil,nil,nil,nil]
+                novo_jogo.tabuleiro.coluna2 = [2,nil,nil,nil,nil,nil]
+                novo_jogo.tabuleiro.coluna3 = [2,nil,nil,nil,nil,nil]
+                novo_jogo.tabuleiro.coluna4 = [2,nil,nil,nil,nil,nil]
+                novo_jogo.tabuleiro.tabuleiro[0] = [2,nil,nil,nil,nil,nil]
+                novo_jogo.tabuleiro.tabuleiro[1] = [2,nil,nil,nil,nil,nil]
+                novo_jogo.tabuleiro.tabuleiro[2] = [2,nil,nil,nil,nil,nil]
+                novo_jogo.tabuleiro.tabuleiro[3] = [2,nil,nil,nil,nil,nil]
+                allow(novo_jogo).to receive(:puts).once
+                novo_jogo.instance_variable_set(:@jogador1,jogador1)
+                novo_jogo.instance_variable_set(:@vencedor,jogador1)
+            end
+            it 'resultado deve ser true' do
+                resultado = novo_jogo.fim_partida?
+                expect(resultado).to eq(true)
+            end
+        end
 end
